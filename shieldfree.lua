@@ -1,4 +1,3 @@
-
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
@@ -11,7 +10,15 @@ for _, v in pairs(CoreGui:GetChildren()) do
 end
 
 local SAC = {
-    Combat = {Aimbot = false, FOV = 150, Smoothing = 0.05, FOVVisible = true, WallCheck = true},
+    Combat = {
+        Aimbot = false, 
+        FOV = 150, 
+        Smoothing = 0.05, 
+        FOVVisible = true, 
+        WallCheck = true,
+        AutoShoot = false, -- Yeni Eklendi
+        ShootDelay = 0.2   -- Yeni Eklendi (Mermiler arası bekleme süresi)
+    },
     Visuals = {Box = false, Name = false, Health = false, Line = false},
     Movement = {Spin = false, SpinSpeed = 100, Fly = false, FlySpeed = 50, Noclip = false},
     Settings = {ResetTimer = 30}
@@ -20,7 +27,6 @@ local SAC = {
 local Cache = {}
 local FOV_Circle = Drawing.new("Circle")
 FOV_Circle.Thickness = 1; FOV_Circle.NumSides = 100; FOV_Circle.Color = Color3.new(1,1,1); FOV_Circle.Visible = false
-
 
 local Watermark = Instance.new("ScreenGui", CoreGui); Watermark.Name = "SHIELD_WATERMARK"
 local WLbl = Instance.new("TextLabel", Watermark)
@@ -86,6 +92,7 @@ end
 
 AddToggle(P_Combat, "Aimbot Master", function(v) SAC.Combat.Aimbot = v end)
 AddToggle(P_Combat, "Wall Check (Legit)", function(v) SAC.Combat.WallCheck = v end)
+AddToggle(P_Combat, "Auto Shoot", function(v) SAC.Combat.AutoShoot = v end) -- Yeni Eklendi
 AddSlider(P_Combat, "Aimbot FOV", 30, 800, 150, function(v) SAC.Combat.FOV = v end)
 AddSlider(P_Combat, "Smoothness", 1, 100, 5, function(v) SAC.Combat.Smoothing = v/100 end)
 
@@ -116,6 +123,8 @@ local function IsVisible(part, char)
     local result = workspace:Raycast(origin, part.Position - origin, ray)
     return result == nil or result.Instance:IsDescendantOf(char)
 end
+
+local lastShot = 0 -- Yeni Eklendi (Ateş etme zamanlayıcısı)
 
 RunService.RenderStepped:Connect(function(dt)
     FOV_Circle.Visible = (SAC.Combat.Aimbot and SAC.Combat.FOVVisible)
@@ -174,6 +183,18 @@ RunService.RenderStepped:Connect(function(dt)
         local moveX = (target2D.X - mouseLoc.X) * SAC.Combat.Smoothing
         local moveY = (target2D.Y - mouseLoc.Y) * SAC.Combat.Smoothing
         if mousemoverel then mousemoverel(moveX, moveY) end
+        
+        -- Yeni Eklenen Auto-Shoot Mantığı
+        if SAC.Combat.AutoShoot then
+            local currentDistance = (target2D - mouseLoc).Magnitude
+            -- Fare hedefe yeterince yakınsa (15 piksel tolerans) ve bekleme süresi dolmuşsa
+            if currentDistance < 15 and (tick() - lastShot) > SAC.Combat.ShootDelay then
+                if mouse1click then
+                    mouse1click() -- Fare sol tıkı simüle eder
+                end
+                lastShot = tick()
+            end
+        end
     end
 end)
 
