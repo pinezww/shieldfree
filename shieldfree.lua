@@ -16,8 +16,8 @@ local SAC = {
         Smoothing = 0.05, 
         FOVVisible = true, 
         WallCheck = true,
-        AutoShoot = false, -- Yeni Eklendi
-        ShootDelay = 0.2   -- Yeni Eklendi (Mermiler arası bekleme süresi)
+        AutoShoot = false, 
+        ShootDelay = 0.2   
     },
     Visuals = {Box = false, Name = false, Health = false, Line = false},
     Movement = {Spin = false, SpinSpeed = 100, Fly = false, FlySpeed = 50, Noclip = false},
@@ -92,7 +92,7 @@ end
 
 AddToggle(P_Combat, "Aimbot Master", function(v) SAC.Combat.Aimbot = v end)
 AddToggle(P_Combat, "Wall Check (Legit)", function(v) SAC.Combat.WallCheck = v end)
-AddToggle(P_Combat, "Auto Shoot", function(v) SAC.Combat.AutoShoot = v end) -- Yeni Eklendi
+AddToggle(P_Combat, "Auto Shoot", function(v) SAC.Combat.AutoShoot = v end)
 AddSlider(P_Combat, "Aimbot FOV", 30, 800, 150, function(v) SAC.Combat.FOV = v end)
 AddSlider(P_Combat, "Smoothness", 1, 100, 5, function(v) SAC.Combat.Smoothing = v/100 end)
 
@@ -124,7 +124,7 @@ local function IsVisible(part, char)
     return result == nil or result.Instance:IsDescendantOf(char)
 end
 
-local lastShot = 0 -- Yeni Eklendi (Ateş etme zamanlayıcısı)
+local lastShot = 0 
 
 RunService.RenderStepped:Connect(function(dt)
     FOV_Circle.Visible = (SAC.Combat.Aimbot and SAC.Combat.FOVVisible)
@@ -184,13 +184,11 @@ RunService.RenderStepped:Connect(function(dt)
         local moveY = (target2D.Y - mouseLoc.Y) * SAC.Combat.Smoothing
         if mousemoverel then mousemoverel(moveX, moveY) end
         
-        -- Yeni Eklenen Auto-Shoot Mantığı
         if SAC.Combat.AutoShoot then
             local currentDistance = (target2D - mouseLoc).Magnitude
-            -- Fare hedefe yeterince yakınsa (15 piksel tolerans) ve bekleme süresi dolmuşsa
             if currentDistance < 15 and (tick() - lastShot) > SAC.Combat.ShootDelay then
                 if mouse1click then
-                    mouse1click() -- Fare sol tıkı simüle eder
+                    mouse1click() 
                 end
                 lastShot = tick()
             end
